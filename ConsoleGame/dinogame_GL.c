@@ -116,7 +116,7 @@ Bird birds[MAX_BIRDS];
 GLuint birdTexture1, birdTexture2;  // Two bird textures for animation
 int birdFrameCount = 0;  // To track animation frames
 GLuint birdVAO, birdVBO, birdEBO;
-float birdY = 40.0f;  // Fixed Y position for birds
+float birdY = 30.0f;  // Fixed Y position for birds
 
 // Add these function prototypes
 void initBirds();
@@ -130,7 +130,7 @@ bool isGameOver = false;
 // Add this function before main()
 bool checkCollision() {
     // Get character hitbox (adjust these values based on visual testing)
-    float charWidth = 40.0f;  // Character width in pixels
+    float charWidth = 32.0f;  // Character width in pixels but we want to check at perfectly matching between them
     float charHeight = isCrouching ? 25.0f : 50.0f;  // Height changes when crouching
     float charLeft = (characterX + 1.0f) * WINDOW_WIDTH / 2.0f + 20.0f;  // Changed from 50.0f to 20.0f
     float charRight = charLeft + charWidth;
@@ -835,28 +835,30 @@ int main() {
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
         // Update cloud positions with direction changes
-        if (cloud1MovingLeft) {
-            cloud1X -= cloud1Speed;
-            if (cloud1X <= 100.0f) cloud1MovingLeft = false;
-        } else {
-            cloud1X += cloud1Speed;
-            if (cloud1X >= 500.0f) cloud1MovingLeft = true;
-        }
+        if (!isGameOver) {  // Only update cloud positions if game is not over
+            if (cloud1MovingLeft) {
+                cloud1X -= cloud1Speed;
+                if (cloud1X <= 100.0f) cloud1MovingLeft = false;
+            } else {
+                cloud1X += cloud1Speed;
+                if (cloud1X >= 500.0f) cloud1MovingLeft = true;
+            }
 
-        if (cloud2MovingLeft) {
-            cloud2X -= cloud2Speed;
-            if (cloud2X <= 100.0f) cloud2MovingLeft = false;
-        } else {
-            cloud2X += cloud2Speed;
-            if (cloud2X >= 500.0f) cloud2MovingLeft = true;
-        }
+            if (cloud2MovingLeft) {
+                cloud2X -= cloud2Speed;
+                if (cloud2X <= 100.0f) cloud2MovingLeft = false;
+            } else {
+                cloud2X += cloud2Speed;
+                if (cloud2X >= 500.0f) cloud2MovingLeft = true;
+            }
 
-        if (cloud3MovingLeft) {
-            cloud3X -= cloud3Speed;
-            if (cloud3X <= 100.0f) cloud3MovingLeft = false;
-        } else {
-            cloud3X += cloud3Speed;
-            if (cloud3X >= 500.0f) cloud3MovingLeft = true;
+            if (cloud3MovingLeft) {
+                cloud3X -= cloud3Speed;
+                if (cloud3X <= 100.0f) cloud3MovingLeft = false;
+            } else {
+                cloud3X += cloud3Speed;
+                if (cloud3X >= 500.0f) cloud3MovingLeft = true;
+            }
         }
 
         // Convert pixel coordinates to OpenGL coordinates for each cloud
