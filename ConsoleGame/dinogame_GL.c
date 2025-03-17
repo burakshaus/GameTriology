@@ -1,3 +1,13 @@
+/* 
+to run the this code you need to type this command in the terminal : 
+gcc -I/opt/homebrew/include/freetype2 -L/opt/homebrew/lib -lfreetype \
+    $(pkg-config --cflags glfw3 freetype2) dinogame_GL.c -o dinogame \
+    $(pkg-config --libs glfw3 freetype2) -framework OpenGL -framework Cocoa -framework IOKit
+
+*/
+
+
+
 #define GL_SILENCE_DEPRECATION
 #define GLFW_INCLUDE_GLCOREARB
 #include <GLFW/glfw3.h>
@@ -7,9 +17,13 @@
 #include "stb_image.h"
 #include <stdbool.h>
 #include <time.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H 
+
 
 #define WINDOW_WIDTH 600
 #define WINDOW_HEIGHT 200
+
 
 // Vertex Shader
 const char* vertexShaderSource = "#version 330 core\n"
@@ -383,6 +397,28 @@ void renderBirds() {
 }
 
 int main() {
+
+    FT_Library ft;
+if (FT_Init_FreeType(&ft))
+{
+printf("ERROR::FREETYPE: Could not init FreeType Library\n");
+    return -1;
+}
+
+FT_Face face;
+if (FT_New_Face(ft, "assets/font.ttf", 0, &face))
+{
+printf("ERROR::FREETYPE: Failed to load font\n");
+    return -1;
+}
+
+FT_Set_Pixel_Sizes(face, 0, 48); 
+
+if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
+{
+printf("ERROR::FREETYPE: Failed to load Glyph\n");
+    return -1;
+}
     if (!glfwInit()) {
         fprintf(stderr, "Failed to initialize GLFW\n");
         return -1;

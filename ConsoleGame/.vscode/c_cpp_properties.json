@@ -5,8 +5,8 @@
             "includePath": [
                 "${default}",
                 "/opt/homebrew/include",
-                "/opt/homebrew/opt/sdl3/include"
-
+                "/opt/homebrew/opt/sdl3/include",
+                "/opt/homebrew/Cellar/freetype/2.13.3/include/freetype2"
             ],
             "defines": [],
             "macFrameworkPath": [
