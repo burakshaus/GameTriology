@@ -1,3 +1,5 @@
+// gcc -o sdl main.c -I/opt/homebrew/include -D_THREAD_SAFE -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
@@ -406,6 +408,7 @@ int main() {
     SDL_FreeSurface(textSurface);
     SDL_DestroyTexture(textTexture);
     }
+
 
     
     cloud_frame_counter++;
