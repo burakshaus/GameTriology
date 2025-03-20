@@ -8,6 +8,8 @@
 #include <termios.h>
 
 // for windows enviroment #include <Windows.h>
+// gcc -o game game.c -pthread -lncurses
+
 
 #define BELOWSPACE 5
 #define SPACEMOVING 5
