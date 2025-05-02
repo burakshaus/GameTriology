@@ -1,7 +1,7 @@
 /* 
 to run the this code you need to type this command in the terminal : 
 gcc -I/opt/homebrew/include/freetype2 -L/opt/homebrew/lib -lfreetype \
-    $(pkg-config --cflags glfw3 freetype2) dinogame_GL.c -o dinogame \
+    $(pkg-config --cflags glfw3 freetype2) dinogame_OpenGL.c -o dinogame \
     $(pkg-config --libs glfw3 freetype2) -framework OpenGL -framework Cocoa -framework IOKit
 
 */
@@ -395,6 +395,7 @@ void renderBirds() {
         }
     }
 }
+
 
 int main() {
 
@@ -855,7 +856,7 @@ printf("ERROR::FREETYPE: Failed to load Glyph\n");
                 printf("Game Over!\n");
             }
         }
-
+        
         // Update vertex positions with dynamic height
         float currentHeight = isCrouching ? crouchHeight : normalHeight;
         float vertices[] = {

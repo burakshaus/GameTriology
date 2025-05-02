@@ -1,4 +1,4 @@
-// gcc -o sdl main.c -I/opt/homebrew/include -D_THREAD_SAFE -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
+// gcc -o sdl dinogame_SDL.c -I/opt/homebrew/include -D_THREAD_SAFE -L/opt/homebrew/lib -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -13,12 +13,30 @@
 #define JUMP_DURATION 500 // Jump duration in milliseconds (4 seconds for slow motion)
 #define JUMP_HEIGHT 50 // Total jump height (from y=150 to y=100)
 #define JUMP_SPEED 1 // Pixels to move per frame (slower for slow motion)
-#define CACTUS_SPEED 0.001
+// #define CACTUS_SPEED 0.0001
+#define SPEED_MULTIPLIER 0.25  // Reduce all speeds to 25% of original
 
 
 bool checkCollision(SDL_Rect a, SDL_Rect b) {
-    bool xOverlap = (a.x < b.x + b.w) && (a.x + a.w > b.x);
-    bool yOverlap = (a.y < b.y + b.h) && (a.y + a.h > b.y);
+    // Create adjusted rectangles with 3 pixel buffer on each side
+    SDL_Rect adjustedA = {
+        a.x + 3,        // Move right edge in by 3 pixels
+        a.y + 3,        // Move top edge down by 3 pixels
+        a.w - 6,        // Reduce width by 6 pixels (3 on each side)
+        a.h - 6         // Reduce height by 6 pixels (3 on each side)
+    };
+    
+    SDL_Rect adjustedB = {
+        b.x + 3,
+        b.y + 3,
+        b.w - 6,
+        b.h - 6
+    };
+    
+    // Check overlap with the adjusted rectangles
+    bool xOverlap = (adjustedA.x < adjustedB.x + adjustedB.w) && (adjustedA.x + adjustedA.w > adjustedB.x);
+    bool yOverlap = (adjustedA.y < adjustedB.y + adjustedB.h) && (adjustedA.y + adjustedA.h > adjustedB.y);
+    
     return xOverlap && yOverlap;
 }
 
@@ -203,39 +221,42 @@ int main() {
     bool gameOver = false; // Add a game over flag
     int score = 0;
     bool isBigCactus = false; 
-    float cactus_speed = 0.001;
+    // float cactus_speed = 0.00001; // Slower initial speed
     int cloud_frame_counter = 0;
     int cloud_move_frequency = 100;
     bool cloud_moving_left = true;  // Direction flag
     int cloud_frame_counter2 = 0;
     int cloud_move_frequency2 = 120;  // Different speed
     bool cloud_moving_left2 = true;
+    int cactus_move_counter = 0;
+    int cactus_move_frequency = 8; // Only move every 10 frames (higher = slower)
 
     while (running) {
     while (SDL_PollEvent(&event)) {
-        switch (score)
-        {
-        case  20 ... 29:
-            cactus_speed = 0.002;
-            break;
-        case  30 ... 49:
-            cactus_speed = 0.01;
-            break;
-        case  50 ... 59:
-            cactus_speed = 0.02;
-            break;
-        case  60 ... 69:
-            cactus_speed = 0.03;
-            break;
-        case  70 ... 79:
-            cactus_speed = 0.07;
-            break;
-        case  80 ... 89:
-            cactus_speed = 0.1;
-            break;
-        default:
-            break;
-        }
+        // switch (score)
+        // {
+        // case  20 ... 29:
+        //     cactus_speed = 0.002;
+        //     break;
+        // case  30 ... 49:
+        //     cactus_speed = 0.01;
+        //     break;
+        // case  50 ... 59:
+        //     cactus_speed = 0.02;
+        //     break;
+        // case  60 ... 69:
+        //     cactus_speed = 0.03;
+        //     break;
+        // case  70 ... 79:
+        //     cactus_speed = 0.07;
+        //     break;
+        // case  80 ... 89:
+        //     cactus_speed = 0.1;
+        //     break;
+        // default:
+        //     cactus_speed = 0.0005;
+        //     break;
+        // }
         
         
         if (event.type == SDL_QUIT) {  
@@ -350,7 +371,7 @@ int main() {
             big_cactus_Rect.x = SCREEN_WIDTH;
             score += 1;
             // Play the sound effect
-            Mix_PlayChannel(-1, scoreUpSound, 0);
+            //Mix_PlayChannel(-1, scoreUpSound, 0);
 
             // randomly choose cactus type
             isBigCactus = (rand() % 2) == 0; // 50% chance for each type 
@@ -361,12 +382,12 @@ int main() {
         {
             if (checkCollision(big_cactus_Rect, destRect)) {
                 gameOver = true; // Stop game updates
-                Mix_PlayChannel(-1, deadSound, 0);
+                //Mix_PlayChannel(-1, deadSound, 0);
             }
         } else {
             if (checkCollision(cactus_Rect, destRect)) {
                 gameOver = true; // Stop game updates
-                Mix_PlayChannel(-1, deadSound, 0);
+                //Mix_PlayChannel(-1, deadSound, 0);
         }
         }
         
@@ -385,14 +406,25 @@ int main() {
     }
 
     SDL_RenderCopy(renderer, currentTexture, NULL, &destRect);
-    if (isBigCactus && !gameOver)
-    {
-        SDL_RenderCopy(renderer, texture7, NULL, &big_cactus_Rect);
-        big_cactus_Rect.x -= CACTUS_SPEED;
-    } else if(!isBigCactus && !gameOver){
-        SDL_RenderCopy(renderer, texture7, NULL, &cactus_Rect);
-        cactus_Rect.x -= CACTUS_SPEED;
+    // Render the cactus
+if (isBigCactus) {
+    SDL_RenderCopy(renderer, texture7, NULL, &big_cactus_Rect);
+} else {
+    SDL_RenderCopy(renderer, texture7, NULL, &cactus_Rect);
+}
+
+// Move the cactus at a controlled rate
+if (!gameOver) {
+    cactus_move_counter+=1;
+    if (cactus_move_counter >= cactus_move_frequency) {
+        if (isBigCactus) {
+            big_cactus_Rect.x -= 3; // Move by 1 pixel
+        } else {
+            cactus_Rect.x -= 3; // Move by 1 pixel
+        }
+        cactus_move_counter = 0;
     }
+}
     
 
     char scoreText[20];
@@ -481,6 +513,11 @@ int main() {
     }
 
     SDL_RenderPresent(renderer);
+    if (gameOver)
+    {
+        sleep(1);
+    }
+    
     
 }
 

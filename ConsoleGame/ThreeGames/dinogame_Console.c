@@ -8,7 +8,7 @@
 #include <termios.h>
 
 // for windows enviroment #include <Windows.h>
-// gcc -o game game.c -pthread -lncurses
+// gcc -o example  dinogame_Console.c -pthread -lncurses
 
 
 #define BELOWSPACE 5
@@ -57,8 +57,6 @@ star init_star(){
   system("clear");
   star star = {0};
   star_count += 1;
-  // srand(time(NULL));
-  // star.layer = (rand() % 3) + 1;
   star.layer = 1;
   star.generated_xPos = MAXLENGHTOFSCREEN+3;
   star.xPos = star.generated_xPos+2;
@@ -256,7 +254,7 @@ bool collision_detection(star star, human human){
   switch (star.layer)
   {
   case 1:
-    if ((human.rLegXPos == star.xPos))
+    if (human.rLegXPos == star.xPos)
   {
     return true;
   }
@@ -605,7 +603,7 @@ void *init_game2() {
   bool collision = false;
 
   while (running2) {
-    printf("human leg x pos %d and stars x pos %d\n",human.rLegXPos, testStar.xPos);    
+    //printf("human leg x pos %d and stars x pos %d\n",human.rLegXPos, testStar.xPos);    
     if (collision_detection(testStar,human))
     {
       draw_human_collision(testStar);
@@ -647,49 +645,6 @@ void *init_game2() {
 
   printf("BRAVO! Your score: %d\n", score);
   pthread_exit(NULL);
-}
-
-void init_game(){
-  system("clear");
-  bool running = true;
-  star testStar = init_star();
-  human testHuman = init_human();
-  star stars[MAXSTARCOUNTCREATED];  // Declare an array of MAXSTARCOUNTCREATED star structs
-  // print_star_information(testStar);
-  // sleep(5);
-  while(running){
-    draw_human(testStar);
-    // sleep(1);
-    if (sleepMilisecond-(200*score) == 0)
-    {
-      running = false;
-    }
-    else {
-    usleep(sleepMilisecond-(200*score));
-    testStar.xPos -= 1;
-    system("clear");
-    if (testStar.xPos == 0)
-    {
-      testStar = init_star();
-      score +=1;
-    }
-    }
-    // usleep(sleepMilisecond-(200*score));
-    // testStar.xPos -= 1;
-    // system("clear");
-    // if (testStar.xPos == 0)
-    // {
-    //   testStar = init_star();
-    //   score +=1;
-    // }
-
-    // debugging star's positions 
-    // printf("xpos of the star block : %d\n", testStar.xPos);
-    // sleep(3);
-    // system("clear");
-  }
-  system("clear");
-  printf("BRAVO you reached the end, Your score : %d",score);
 }
 
 int main() {
