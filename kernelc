@@ -313,3 +313,132 @@ void kmain(void)
 
 
 }
+
+keyboard_map.h
+
+
+/* The following array is taken from 
+    http://www.osdever.net/bkerndev/Docs/keyboard.htm
+   All credits where due
+*/
+
+unsigned char keyboard_map[128] =
+{
+    0,  27, '1', '2', '3', '4', '5', '6', '7', '8',	/* 9 */
+  '9', '0', '-', '=', '\b',	/* Backspace */
+  '\t',			/* Tab */
+  'q', 'w', 'e', 'r',	/* 19 */
+  't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',	/* Enter key */
+    0,			/* 29   - Control */
+  'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';',	/* 39 */
+ '\'', '`',   0,		/* Left shift */
+ '\\', 'z', 'x', 'c', 'v', 'b', 'n',			/* 49 */
+  'm', ',', '.', '/',   0,				/* Right shift */
+  '*',
+    0,	/* Alt */
+  ' ',	/* Space bar */
+    0,	/* Caps lock */
+    0,	/* 59 - F1 key ... > */
+    0,   0,   0,   0,   0,   0,   0,   0,
+    0,	/* < ... F10 */
+    0,	/* 69 - Num lock*/
+    0,	/* Scroll Lock */
+    0,	/* Home key */
+    0,	/* Up Arrow */
+    0,	/* Page Up */
+  '-',
+    0,	/* Left Arrow */
+    0,
+    0,	/* Right Arrow */
+  '+',
+    0,	/* 79 - End key*/
+    0,	/* Down Arrow */
+    0,	/* Page Down */
+    0,	/* Insert Key */
+    0,	/* Delete Key */
+    0,   0,   0,
+    0,	/* F11 Key */
+    0,	/* F12 Key */
+    0,	/* All other keys are undefined */
+};
+
+
+
+
+
+
+kernel.asm
+
+; Copyright (C) 2014  Arjun Sreedharan
+; License: GPL version 2 or higher http://www.gnu.org/licenses/gpl.html
+
+bits 32
+section .text
+        ;multiboot spec
+        align 4
+        dd 0x1BADB002              ;magic
+        dd 0x00                    ;flags
+        dd - (0x1BADB002 + 0x00)   ;checksum. m+f+c should be zero
+
+global start
+global keyboard_handler
+global read_port
+global write_port
+global load_idt
+
+extern kmain 		;this is defined in the c file
+extern keyboard_handler_main
+
+read_port:
+	mov edx, [esp + 4]
+			;al is the lower 8 bits of eax
+	in al, dx	;dx is the lower 16 bits of edx
+	ret
+
+write_port:
+	mov   edx, [esp + 4]    
+	mov   al, [esp + 4 + 4]  
+	out   dx, al  
+	ret
+
+load_idt:
+	mov edx, [esp + 4]
+	lidt [edx]
+	sti 				;turn on interrupts
+	ret
+
+keyboard_handler:                 
+	call    keyboard_handler_main
+	iretd
+
+start:
+	cli 				;block interrupts
+	mov esp, stack_space
+	call kmain
+	hlt 				;halt the CPU
+
+section .bss
+resb 8192; 8KB for stack
+stack_space:
+
+
+
+
+
+
+
+
+
+
+
+link.ld
+
+OUTPUT_FORMAT(elf32-i386)
+ENTRY(start)
+SECTIONS
+ {
+   . = 0x100000;
+   .text : { *(.text) }
+   .data : { *(.data) }
+   .bss  : { *(.bss)  }
+ }
